@@ -51,4 +51,19 @@ def post_model(body: ModelRequest, background_tasks: BackgroundTasks):
         return {"status": "error", "message": "Model is already being deployed"}
     status["state"] = "PENDING"
     background_tasks.add_task(load_model, body.model_id)
-    return {"status": "success", "model_id": _
+    return {"status": "success", "model_id": body.model_id}
+
+
+@app.post("/completion")
+def post_completion(body: ChatRequest):
+    if status["state"] != "RUNNING" or model_pipeline is None:
+        return {"status": "error", "message": "Model is not running"}
+
+    user_msg = body.messages[-1]["content"]
+    try:
+        result = model_pipeline(user_msg, max_length=50,
+                                num_return_sequences=1)
+        reply = result[0]["generated_text"]
+        return {"status": "success", "response": [{"role": "assistant", "message": reply}]}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
