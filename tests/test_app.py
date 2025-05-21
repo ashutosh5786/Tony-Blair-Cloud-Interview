@@ -6,8 +6,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 client = TestClient(app)
-client = TestClient(app)
-
 
 def test_get_status_initial():
     response = client.get("/status")
