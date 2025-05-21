@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from transformers import pipeline
 from threading import Lock
 import time
+from prometheus_client import Counter, Gauge, generate_latest, CONTENT_TYPE_LATEST
+
 
 app = FastAPI()
 
@@ -23,6 +25,28 @@ class ModelRequest(BaseModel):
 @app.get("/status")
 def get_status():
     return {"status": status["state"]}
+
+
+REQUEST_COUNT = Counter("app_requests_total",
+                        "Total number of /completion requests")
+MODEL_LOAD_TIME = Gauge("model_load_duration_seconds",
+                        "Model load duration in seconds")
+
+
+def load_model(model_id: str):
+    global model_pipeline
+    try:
+        with lock:
+            status["state"] = "DEPLOYING"
+            start = time.time()
+            model_pipeline = pipeline("text-generation", model=model_id)
+            duration = time.time() - start
+            MODEL_LOAD_TIME.set(duration)
+            status["state"] = "RUNNING"
+            status["model_id"] = model_id
+    except Exception as e:
+        status["state"] = "NOT_DEPLOYED"
+        status["model_id"] = None
 
 
 @app.get("/model")
