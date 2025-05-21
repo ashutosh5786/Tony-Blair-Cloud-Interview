@@ -1,0 +1,54 @@
+from fastapi import FastAPI, Request, BackgroundTasks
+from pydantic import BaseModel
+from transformers import pipeline
+from threading import Lock
+import time
+
+app = FastAPI()
+
+# Status: NOT_DEPLOYED | PENDING | DEPLOYING | RUNNING
+status = {"state": "NOT_DEPLOYED", "model_id": None}
+lock = Lock()
+model_pipeline = None
+
+
+class ChatRequest(BaseModel):
+    messages: list[dict]
+
+
+class ModelRequest(BaseModel):
+    model_id: str
+
+
+@app.get("/status")
+def get_status():
+    return {"status": status["state"]}
+
+
+@app.get("/model")
+def get_model():
+    return {"model_id": status["model_id"]}
+
+
+def load_model(model_id: str):
+    global model_pipeline
+    try:
+        with lock:
+            status["state"] = "DEPLOYING"
+            time.sleep(1)  # simulate load
+            model_pipeline = pipeline("text-generation", model=model_id)
+            status["state"] = "RUNNING"
+            status["model_id"] = model_id
+    except Exception as e:
+        status["state"] = "NOT_DEPLOYED"
+        status["model_id"] = None
+        print(f"Error loading model: {e}")
+
+
+@app.post("/model")
+def post_model(body: ModelRequest, background_tasks: BackgroundTasks):
+    if status["state"] in ["DEPLOYING", "PENDING"]:
+        return {"status": "error", "message": "Model is already being deployed"}
+    status["state"] = "PENDING"
+    background_tasks.add_task(load_model, body.model_id)
+    return {"status": "success", "model_id": _
