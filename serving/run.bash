@@ -1,10 +1,15 @@
-uvicorn main:app --reload
+#!/bin/bash
 
+set -e
 
-## we cam run test service with
+IMAGE_NAME="ml-serving"
+TAG="latest"
 
-curl -X POST http://localhost:8000/model -H "Content-Type: application/json" \
-  -d '{"model_id": "gpt2"}'
+echo "🐳 [serving] Building Docker image..."
+docker build -t $IMAGE_NAME:$TAG .
 
-curl -X POST http://localhost:8000/completion -H "Content-Type: application/json" \
-  -d '{"messages": [{"role": "user", "content": "Hello"}]}'
+read -p "➡️  Do you want to run it locally (port 8000)? (y/n): " run_local
+if [[ "$run_local" == "y" ]]; then
+  docker run -d -p 8000:80 --name $IMAGE_NAME $IMAGE_NAME:$TAG
+  echo "✅ App running on http://localhost:8000"
+fi

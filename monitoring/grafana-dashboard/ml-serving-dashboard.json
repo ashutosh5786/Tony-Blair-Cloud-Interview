@@ -1,0 +1,64 @@
+{
+  "id": null,
+  "uid": "9d55bcca-4",
+  "title": "ML Serving Dashboard",
+  "tags": ["ml", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Node CPU Usage (%)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Node Memory Usage (%)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "id": 2
+    },
+    {
+      "type": "graph",
+      "title": "Requests Per Minute",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(app_requests_total[1m])",
+          "legendFormat": "Requests",
+          "refId": "A"
+        }
+      ],
+      "id": 3
+    },
+    {
+      "type": "graph",
+      "title": "Model Load Duration (s)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "model_load_duration_seconds",
+          "legendFormat": "Load Time",
+          "refId": "A"
+        }
+      ],
+      "id": 4
+    }
+  ]
+}
