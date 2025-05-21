@@ -13,6 +13,8 @@ helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheu
   --namespace monitoring \
   --set grafana.enabled=true \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+  --set prometheus.prometheusSpec.maximumStartupDurationSeconds=300
+
 
 echo "⏳ Waiting for Grafana to be ready..."
 kubectl rollout status deployment/kube-prometheus-stack-grafana -n monitoring
