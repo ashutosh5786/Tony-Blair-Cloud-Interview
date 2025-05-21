@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: ml-serving
 spec:
-  type: LoadBalancer # NOTE Use NodePort for Minikube if LoadBalancer not supported
+  type: NodePort # NOTE Use NodePort for Minikube if LoadBalancer not supported
   selector:
     app: ml-serving
   ports:

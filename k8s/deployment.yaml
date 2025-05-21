@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ml-serving
-          image: <dockerhub-username>/ml-serving:latest # <- TODO replace this
+          image: ashutosh5786/ml-serving:latest # <- TODO replace this with the actual image URI if using self-created image
           ports:
             - containerPort: 80
           resources:
